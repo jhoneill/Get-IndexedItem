@@ -1,33 +1,34 @@
-﻿
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments","")]
+#region define field aliases
 #Alias definitions take the form  AliasName = "Full.Cannonical.Name" ;
 #Any defined here will be accepted as input field names in -Filter and -OrderBy parameters
 #and will be added to output objects as AliasProperties.
- $PropertyAliases   = @{Width         = "System.Image.HorizontalSize";       Height = "System.Image.VerticalSize"; Name   = "System.FileName";
-                        Extension     = "System.FileExtension";        CreationTime = "System.DateCreated";        Length = "System.Size";
-                        LastWriteTime = "System.DateModified";              Keyword = "System.Keywords";           Tag    = "System.Keywords"
-                        CameraMaker   = "System.Photo.Cameramanufacturer"; Software = "System.ApplicationName"}
+$PropertyAliases   = @{Width         = "System.Image.HorizontalSize";       Height = "System.Image.VerticalSize"; Name   = "System.FileName";
+                       Extension     = "System.FileExtension";        CreationTime = "System.DateCreated";        Length = "System.Size";
+                       LastWriteTime = "System.DateModified";              Keyword = "System.Keywords";           Tag    = "System.Keywords"
+                       CameraMaker   = "System.Photo.Cameramanufacturer"; Software = "System.ApplicationName"}
 
- $FieldTypes = "System", "Photo", "Image", "Music", "Media", "RecordedTv", "Search", "Audio"
+$FieldTypes = "System", "Photo", "Image", "Music", "Media", "RecordedTv", "Search", "Audio"
 #For each of the field types listed above, define a prefix & a list of fields, formatted as "Bare_fieldName1|Bare_fieldName2|Bare_fieldName3"
 #Anything which appears in FieldTypes must have a prefix and fields definition.
 #Any definitions which don't appear in FieldTypes will be ignored
 #See http://msdn.microsoft.com/en-us/library/dd561977(v=VS.85).aspx for property info.
 
 #https://docs.microsoft.com/en-gb/windows/desktop/properties/document-bumper
- $SystemPrefix     = "System."            ;     $SystemFields = "ItemName|ItemUrl|FileExtension|FileName|FileAttributes|FileOwner|ItemType|ItemTypeText|KindText|Kind|MIMEType|Size|DateModified|DateAccessed|DateImported|DateAcquired|DateCreated|Author|Company|Copyright|Subject|Title|Keywords|Comment|SoftwareUsed|Rating|RatingText|ApplicationName|ItemPathDisplay"
- $PhotoPrefix      = "System.Photo."      ;      $PhotoFields = "fNumber|ExposureTime|FocalLength|IsoSpeed|PeopleNames|DateTaken|Cameramodel|Cameramanufacturer|orientation"#https://docs.microsoft.com/en-gb/windows/desktop/properties/photo-bumper
- $ImagePrefix      = "System.Image."      ;      $ImageFields = "Dimensions|HorizontalSize|VerticalSize" #https://docs.microsoft.com/en-gb/windows/desktop/properties/image-bumper
- $MusicPrefix      = "System.Music."      ;      $MusicFields = "AlbumArtist|AlbumID|AlbumTitle|Artist|BeatsPerMinute|Composer|Conductor|DisplayArtist|Genre|PartOfSet|TrackNumber" #https://docs.microsoft.com/en-gb/windows/desktop/properties/music-bumper
- $AudioPrefix      = "System.Audio."      ;      $AudioFields = "ChannelCount|EncodingBitrate|PeakValue|SampleRate|SampleSize"
- $MediaPrefix      = "System.Media."      ;      $MediaFields = "Duration|Year"
- $RecordedTVPrefix = "System.RecordedTV." ; $RecordedTVFields = "ChannelNumber|EpisodeName|OriginalBroadcastDate|ProgramDescription|RecordingTime|StationName"
- $SearchPrefix     = "System.Search."     ;     $SearchFields = "AutoSummary|HitCount|Rank|Store" #https://docs.microsoft.com/en-gb/windows/desktop/properties/search-bumper
+$SystemPrefix     = "System."            ;     $SystemFields = "ItemName|ItemUrl|FileExtension|FileName|FileAttributes|FileOwner|ItemType|ItemTypeText|KindText|Kind|MIMEType|Size|DateModified|DateAccessed|DateImported|DateAcquired|DateCreated|Author|Company|Copyright|Subject|Title|Keywords|Comment|SoftwareUsed|Rating|RatingText|ApplicationName|ItemPathDisplay"
+$PhotoPrefix      = "System.Photo."      ;      $PhotoFields = "fNumber|ExposureTime|FocalLength|IsoSpeed|PeopleNames|DateTaken|Cameramodel|Cameramanufacturer|orientation"#https://docs.microsoft.com/en-gb/windows/desktop/properties/photo-bumper
+$ImagePrefix      = "System.Image."      ;      $ImageFields = "Dimensions|HorizontalSize|VerticalSize" #https://docs.microsoft.com/en-gb/windows/desktop/properties/image-bumper
+$MusicPrefix      = "System.Music."      ;      $MusicFields = "AlbumArtist|AlbumID|AlbumTitle|Artist|BeatsPerMinute|Composer|Conductor|DisplayArtist|Genre|PartOfSet|TrackNumber" #https://docs.microsoft.com/en-gb/windows/desktop/properties/music-bumper
+$AudioPrefix      = "System.Audio."      ;      $AudioFields = "ChannelCount|EncodingBitrate|PeakValue|SampleRate|SampleSize"
+$MediaPrefix      = "System.Media."      ;      $MediaFields = "Duration|Year"
+$RecordedTVPrefix = "System.RecordedTV." ; $RecordedTVFields = "ChannelNumber|EpisodeName|OriginalBroadcastDate|ProgramDescription|RecordingTime|StationName"
+$SearchPrefix     = "System.Search."     ;     $SearchFields = "AutoSummary|HitCount|Rank|Store" #https://docs.microsoft.com/en-gb/windows/desktop/properties/search-bumper
 
- $SelectFields     = $FieldTypes  | ForEach-Object { (Get-Variable -Name "$($_)Fields").value -split "\|" }
- $IndexFields      = $PropertyAliases.keys  + $SelectFields | Sort-Object
- $IndexFields      | ForEach-Object -Begin {$CodeFrag =  "public struct IndexedItem`r`n{"} `
+$SelectFields     = $FieldTypes  | ForEach-Object { (Get-Variable -Name "$($_)Fields").value -split "\|" }
+$IndexFields      = $PropertyAliases.keys  + $SelectFields | Sort-Object
+$IndexFields      | ForEach-Object -Begin {$CodeFrag =  "public struct IndexedItem`r`n{"} `
                               -Process {$CodeFrag += "    public string $_;`r`n" } -end { Add-Type -TypeDefinition ($CodeFrag + "`r`n}") }
-
+#endRegion
 Function Get-IndexedItem {
     <#
       .SYNOPSIS
@@ -43,10 +44,29 @@ Function Get-IndexedItem {
         If no =, >,< , Like or Contains is specified the terms will be used in a FreeText contains search
         Syntax Information for CONTAINS and FREETEXT can be found at
         http://msdn.microsoft.com/en-us/library/dd626247(v=office.11).aspx
+      .PARAMETER Where
+        Allows a field name to specified for a WHERE condition, used in conjuect with -Eq etc.
+      .PARAMETER EQ
+        Combined with -Where to specify "field is equal to ..."
+      .PARAMETER NE
+        Used with -Where to specify "field is not equal to ..."
+      .PARAMETER GT
+        Used with -Where to specify "field is greater than ..."
+      .PARAMETER LT
+        Used with -Where to specify "field is less than ..."
+      .PARAMETER Like
+        Used with -Where to specify a wild card match "field is like ..."
+      .PARAMETER Contains
+        Used with -Where to specify a free text search
       .PARAMETER OrderBy
         Alias SORT
         Either a single string containing one or more Order BY conditions,
         or multiple string each with a single condition which will be joined together
+      .PARAMETER Property
+        If specified will reduce the properties to be returned by command
+      .PARAMETER Bare
+        If -Bare is not specified the command will convert the field names to easier to read names.
+        Specifying -Bare prevents this conversion and improves performance.
       .PARAMETER Path
         A single string containing a path which should be searched.
         This may be a UNC path to a share on a remote computer
@@ -68,6 +88,12 @@ Function Get-IndexedItem {
         Normally if files are found, the command returns a file object with additional properties,
         which can be piped into commands which accept files. This switch prevents the file being fetched
         improving performance when the file object is not needed.
+      .PARAMETER OutputVariable
+        PowerShell will normally expand a table into its rows and pass return the rows via the pipeline.
+        OutputVariable works like standard Parameter *variable, it takes a variable name and creates stores
+        the database table in it. This variable is accessible from the calling scope. In some cases the variable
+        can be created in the parent of the calling scope so it is recommend to use a variable which hasn't
+        been set in the current scope and to use remove-variable Name, rather than $variable = $null to clear it.
       .EXAMPLE
         Get-IndexedItem -Filter "Contains(*,'Stingray')", "kind = 'picture'", "keywords='portfolio'" -path ~ -recurse
         Finds picture files anywhere on the current users profile, which have 'Portfolio' as a keyword tag,
@@ -118,7 +144,7 @@ Function Get-IndexedItem {
         Shows MP3 files with Artist and Track name, showing Size, duration, actual and encoding bits per second and sample rate
       .EXAMPLE
         Get-IndexedItem -path c:\ -recurse  -Filter cameramaker=pentax* -Property focallength | group focallength -no | sort -property @{e={[double]$_.name}}
-        Gets all the items which have a the camera maker set to pentax, anywhere on the C: driv
+        Gets all the items which have a the camera maker set to pentax, anywhere on the C: drive
         but ONLY get thier focallength property, and return a sorted count of how many of each focal length there are.
     #>
     #$t=(Get-IndexedItem -Value "title" -filter "kind=recordedtv" -path \\atom-engine\users  -recurse | Select-List -Property title).title
@@ -221,12 +247,12 @@ Function Get-IndexedItem {
 
     #Make a giant SELECT clause from the field lists; replace "|" with ", " - field prefixes will be inserted later.
     #There is an extra comma to ensure the last field name is recognized and gets a prefix. This is tidied up later
-    if ($EQ        -and $Where)  { $Filter +=           "$where =    $EQ"          }
-    if ($NE        -and $Where)  { $Filter +=           "$where <>   $NE"          }
-    if ($GT        -and $Where)  { $Filter +=           "$where >    $GT"          }
-    if ($LT        -and $Where)  { $Filter +=           "$where <    $LT"          }
-    if ($Like      -and $Where)  { $Filter +=           "$where LIKE $Like"        }
-    if ($Contains  -and $Where)  { $Filter += "Contains( $where ,  '$Contains'  )" }
+    if ($EQ        -and $Where)  { $Filter +=           "$Where =    $EQ"          }
+    if ($NE        -and $Where)  { $Filter +=           "$Where <>   $NE"          }
+    if ($GT        -and $Where)  { $Filter +=           "$Where >    $GT"          }
+    if ($LT        -and $Where)  { $Filter +=           "$Where <    $LT"          }
+    if ($Like      -and $Where)  { $Filter +=           "$Where LIKE $Like"        }
+    if ($Contains  -and $Where)  { $Filter += "Contains( $Where ,   '$Contains' )" }
     if ($First)    {$SQL =  "SELECT TOP $First "}
     else           {$SQL =  "SELECT "}
     if ($Property) {$SQL += ($Property     -join ", ") + ", "}
@@ -305,7 +331,7 @@ Function Get-IndexedItem {
     $adapter = New-Object -TypeName system.data.oledb.oleDBDataadapter -argumentlist $sql, "Provider=Search.CollatorDSO;Extended Properties=’Application=Windows’;"
     $ds      = New-Object -TypeName system.data.dataset
     if ($adapter.Fill($ds)) {
-            if ($OutputVariable) {Set-Variable -Scope 1 -Name $OutputVariable -Value $ds.Tables[0] -Visibility Public}
+            if ($OutputVariable) {Set-Variable -Scope 2 -Name $OutputVariable -Value $ds.Tables[0] }
             else {
                 foreach ($row in $ds.Tables[0])  {
                     #If the dataRow refers to a file output a file obj with extra properties, otherwise output a PSobject
@@ -330,7 +356,7 @@ Function Get-IndexedItem {
                             }
                             #Add aliases
                             foreach ($prop in ($PropertyAliases.Keys | Where-Object {  ($row."$($propertyAliases.$_)" -isnot [System.DBNull] ) -and
-                                                                                   ($row."$($propertyAliases.$_)" -ne $null )})) {
+                                                                                   ($null -ne $row."$($propertyAliases.$_)")})) {
                                 Add-Member -ErrorAction "SilentlyContinue" -InputObject $obj -MemberType AliasProperty -Name $prop -Value ($propertyAliases.$prop  -split "\." )[-1]
                             }
                             #Overwrite duration as a timespan not as 100ns ticks
@@ -341,6 +367,4 @@ Function Get-IndexedItem {
                 }
             }
         }
-
 }
-
