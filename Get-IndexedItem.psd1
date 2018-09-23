@@ -17,6 +17,7 @@
 
     CLRVersion        = "2.0"
 
-    FunctionsToExport =
-    'Get-IndexedItem'
+    FunctionsToExport = 'Get-IndexedItem'
+
+    VariablesToExport = ''
 }
