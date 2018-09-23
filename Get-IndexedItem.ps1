@@ -45,11 +45,17 @@ Function Get-IndexedItem {
         Syntax Information for CONTAINS and FREETEXT can be found at
         http://msdn.microsoft.com/en-us/library/dd626247(v=office.11).aspx
       .PARAMETER Where
+<<<<<<< HEAD
         Allows a field name to specified for a WHERE condition, used in conjunction with -Eq etc.
         An argument completer will allow intellisense to suggest field names
       .PARAMETER EQ
         Combined with -Where to specify "field is equal to ..." .
         An argument completer allows intellisense to suggest possible values for this field
+=======
+        Allows a field name to specified for a WHERE condition, used in conjuect with -Eq etc.
+      .PARAMETER EQ
+        Combined with -Where to specify "field is equal to ..."
+>>>>>>> 4cd6e1b6e887b6bb15c46a0d62ee06047915e992
       .PARAMETER NE
         Used with -Where to specify "field is not equal to ..."
       .PARAMETER GT
