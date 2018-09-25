@@ -32,19 +32,26 @@ $IndexFields      | ForEach-Object -Begin {$CodeFrag =  "public struct IndexedIt
 Function Get-IndexedItem {
     <#
       .SYNOPSIS
-        Gets files which have been indexed by Windows desktop search
+        Gets files that have been indexed by Windows Desktop Search.
       .Description
-        Searches the Windows index on the local computer or a remote file serving computer
-        Looking for file properties or free text searching over contents
+        Searches the Windows-Index on the local computer, or on a remote file serving computer,
+        looking for matching file meta-data properties or performing free text searches on file contents.
       .PARAMETER Filter
-        Alias INCLUDE
-        A single string containing a WHERE condition, or multiple conditions linked with AND
-        or Multiple strings each with a single Condition, which will be joined together.
-        The function tries to add Prefixes and single quotes if they are omitted
-        If no =, >,< , Like or Contains is specified the terms will be used in a FreeText contains search
+        Alias INCLUDE.
+        A single string containing a WHERE condition, or containing multiple conditions linked with 'AND'
+        or multiple strings, each holding a single Condition, which will be joined together.
+        The function tries to add file-name prefixes and single quotes around string values if they are omitted.
+        If no =, >,< , Like or Contains is specified, the terms will be used in a FreeText CONTAINS search
         Syntax Information for CONTAINS and FREETEXT can be found at
-        http://msdn.microsoft.com/en-us/library/dd626247(v=office.11).aspx
+        http://msdn.microsoft.com/en-us/library/dd626247(v=office.11).aspx .
       .PARAMETER Where
+<<<<<<< HEAD
+        Specifies a field-name for a WHERE condition,; used in conjunction with -Eq etc.
+        An argument completer allows intellisense to suggest field names.
+      .PARAMETER EQ
+        Combined with -Where to specify "field is equal to ..." .
+        An argument completer allows intellisense to suggest possible values for this field.
+=======
 <<<<<<< HEAD
         Allows a field name to specified for a WHERE condition, used in conjunction with -Eq etc.
         An argument completer will allow intellisense to suggest field names
@@ -56,41 +63,43 @@ Function Get-IndexedItem {
       .PARAMETER EQ
         Combined with -Where to specify "field is equal to ..."
 >>>>>>> 4cd6e1b6e887b6bb15c46a0d62ee06047915e992
+>>>>>>> 6d63b27b80c4cc8095934968af6f20ab8cf43e4a
       .PARAMETER NE
-        Used with -Where to specify "field is not equal to ..."
+        Used with -Where to specify "field is not equal to ...".
       .PARAMETER GT
-        Used with -Where to specify "field is greater than ..."
+        Used with -Where to specify "field is greater than ...".
       .PARAMETER LT
-        Used with -Where to specify "field is less than ..."
+        Used with -Where to specify "field is less than ...".
       .PARAMETER Like
-        Used with -Where to specify a wild card match "field is like ..."
+        Used with -Where to specify a wild card match "field is like ...".
       .PARAMETER Contains
-        Used with -Where to specify a free text search
+        Used with -Where to specify a free text search.
       .PARAMETER OrderBy
-        Alias SORT
+        Alias SORT.
         Either a single string containing one or more Order BY conditions,
-        or multiple string each with a single condition which will be joined together
+        or multiple strings, each with a single condition which will be joined together.
       .PARAMETER Property
-        If specified will reduce the properties to be returned by command
+        By defauult all possible properties of indexed items are returned.
+        If -Property is specified only the named properties will be returned.
       .PARAMETER Bare
-        If -Bare is not specified the command will convert the field names to easier to read names.
+        If -Bare is not specified the command will convert the field-names to easier to read names.
         Specifying -Bare prevents this conversion and improves performance.
       .PARAMETER Path
         A single string containing a path which should be searched.
-        This may be a UNC path to a share on a remote computer
+        This may be a UNC path to a share on a remote computer.
+        If -Path is not specified, the whole index will be searched.
       .PARAMETER First
-        Alias TOP
+        Alias TOP.
         A single integer representing the number of items to be returned.
       .PARAMETER Value
         Alias GROUP
-        A single string containing a Field name.
-        If specified the search will return the Values in this field, instead of objects
-        for the items found by the query terms.
+        A single string containing a field-name. If specified the search will return the values
+        in this field, instead of objects for the items found by the query terms.
       .PARAMETER Recurse
-        If Path is specified only a single folder is searched Unless -Recurse is specified
-        If path is not specified the whole index is searched, and recurse is ignored.
+        If -Path is specified only a single folder is searched Unless -Recurse is specified.
+        If -Path is not specified the whole index is searched, and -Recurse is ignored.
       .PARAMETER List
-        Instead of querying the index produces a list of known field names, with short names and aliases
+        Instead of querying the index, produces a list of known field names, with short names and aliases
         which may be used instead.
       .PARAMETER NoFiles
         Normally if files are found, the command returns a file object with additional properties,
@@ -98,50 +107,58 @@ Function Get-IndexedItem {
         improving performance when the file object is not needed.
       .PARAMETER OutputVariable
         PowerShell will normally expand a table into its rows and pass return the rows via the pipeline.
-        OutputVariable works like standard Parameter *variable, it takes a variable name and creates stores
-        the database table in it. This variable is accessible from the calling scope. In some cases the variable
-        can be created in the parent of the calling scope so it is recommend to use a variable which hasn't
-        been set in the current scope and to use remove-variable Name, rather than $variable = $null to clear it.
+        OutputVariable works like Common *variable Parameters, it takes a variable name and creates stores
+        the database table in it. This variable is accessible from the calling scope.
       .EXAMPLE
         Get-IndexedItem -Filter "Contains(*,'Stingray')", "kind = 'picture'", "keywords='portfolio'" -path ~ -recurse
+
         Finds picture files anywhere on the current users profile, which have 'Portfolio' as a keyword tag,
         and 'stringray' in any indexed property.
       .EXAMPLE
         Get-IndexedItem Stingray, kind=picture, keyword=portfolio -recurse ~ | copy -destination e:\
+
         Finds the same pictures as the previous example but uses Keyword as an alias for KeywordS, and
         leaves the ' marks round Portfolio and Contains() round stingray to be automatically inserted;
-        then copies the found files to drive E:
+        then copies the found files to drive E:.
       .EXAMPLE
         Get-IndexedItem -filter stingray -path OneIndex16:// -recurse
-        Finds OneNote items containing "Stingray"
-        (note, nothing will be found without -recurse and the number after Index is office version specific)
+
+        Finds OneNote items containing "Stingray".
+        (note, nothing will be found without -recurse and the number after Index is office version specific.)
       .EXAMPLE
         Get-IndexedItem -filter stingray -path ([system.environment]::GetFolderPath( [system.environment+specialFolder]::MyPictures )) -recurse
+
         Looks for pictures with stingray in any indexed property, limiting the scope of the search
         to the current user's 'My Pictures' folder and its subfolders.
       .EXAMPLE
         Get-IndexedItem -Filter "system.kind = 'recordedTV' " -order "System.RecordedTV.RecordingTime" -path "\\atom-engine\users" -recurse | format-list path,title,episodeName,programDescription
+
         Finds recorded TV files on a remote server named 'Atom-Engine' which are accessible via a share named 'users'.
         Field name prefixes are specified explicitly instead of letting the function add them.
         Results are displayed as a list using a subset of the available fields specific to recorded TV.
       .EXAMPLE
         Get-IndexedItem -Value "kind" -path \\atom-engine\users  -recurse
-        Lists the kinds of files available on the on the 'users' share of a remote server named 'Atom-Engine'
+
+        Lists the kinds of files available on the on the 'users' share of a remote server named 'Atom-Engine'.
       .EXAMPLE
         Get-IndexedItem -Value "title" -filter "kind=recordedtv" -path \\atom-engine\users  -recurse
-        Lists the titles of RecordedTv files available on the on the 'users' share of a remote server named 'Atom-Engine'
+
+        Lists the titles of RecordedTv files available on the on the 'users' share of a remote server named 'Atom-Engine'.
       .EXAMPLE
         Start (Get-IndexedItem -path "\\atom-engine\users" -recurse -Filter "title= 'Formula 1' " -order "System.RecordedTV.RecordingTime DESC" -top 1 )
-        Finds files entitled "Formula 1" on the 'users' share of a remote server named 'Atom-Engine'
+
+        Finds files entitled "Formula 1" on the 'users' share of a remote server named 'Atom-Engine'.
         Selects the most recent one by TV recording date, and opens it on the local computer.
         Note: start does not support piped input.
       .EXAMPLE
-        Get-IndexedItem -Filter "System.Kind = 'Music' AND AlbumArtist like '%'  " -path $null -NoFiles | Group-Object -NoElement -Property "AlbumArtist" | sort -Descending -property count
-        Gets all music files with an Album Artist set, using a single combined where condition and a mixture
-        of implicit and explicit field prefixes.  Setting path to Null searches the whole computer.
+        Get-IndexedItem -Filter "System.Kind = 'Music' AND AlbumArtist like '%' " -NoFiles | Group-Object -NoElement -Property "AlbumArtist" | sort -Descending -property count
+
+        Gets all music files with an Album Artist set, using a single where condition combining two terms
+        and a mixture of implicit and explicit field prefixes.
         The result is grouped by Artist and sorted to give popular artist first
       .EXAMPLE
         Get-IndexedItem -Filter "Kind=music","DateModified>'2012-05-31'" -NoFiles | Select-Object -ExpandProperty name
+
         Gets Music files which have been modified since a given date, and shows just their names.
         Note the date format; and note that the date is actually a date time, so DataModified= will only match files saved at midnight.
       .EXAMPLE
@@ -149,21 +166,22 @@ Function Get-IndexedItem {
             Title, @{n="size"; e={($_.size/1MB).tostring("n2")+"MB" }},@{n="duration";e={$_.duration.totalseconds.tostring("n0")+"sec"}},
             @{n="Byes/Sec";e={($_.size/128/$_.duration.totalSeconds).tostring("n0")+"Kb/s"}},@{n="Encoding";e={($_.EncodingBitrate/1000).tostring("n0")+"Kb/s"}},
             @{n="Sample Rate";e={($_.sampleRate/1000).tostring("n1")+"KHz"}}
-        Shows MP3 files with Artist and Track name, showing Size, duration, actual and encoding bits per second and sample rate
+
+            Shows MP3 files with Artist and Track name, showing Size, duration, actual and encoding bits per second and sample rate
       .EXAMPLE
-        Get-IndexedItem -path c:\ -recurse  -Filter cameramaker=pentax* -Property focallength | group focallength -no | sort -property @{e={[double]$_.name}}
-        Gets all the items which have a the camera maker set to pentax, anywhere on the C: drive
+        Get-IndexedItem -path c:\ -recurse  -Filter cameramaker=Pentax* -Property focallength | group focallength -no | sort -property @{e={[double]$_.name}}
+
+        Gets all the items which have a the Camera Maker set to "Pentax", anywhere on the C: drive
         but ONLY get thier focallength property, and return a sorted count of how many of each focal length there are.
     #>
-    #$t=(Get-IndexedItem -Value "title" -filter "kind=recordedtv" -path \\atom-engine\users  -recurse | Select-List -Property title).title
-    #start (Get-IndexedItem -filter "kind=recordedtv","title='$t'" -path \\atom-engine\users  -recurse | Select-List -Property ORIGINALBROADCASTDATE,PROGRAMDESCRIPTION)
+
     [CmdletBinding(DefaultParameterSetName='Filter')]
     [OutputType([IndexedItem],[system.io.fileinfo])]
     Param (
         [parameter(ParameterSetName="Filter",       Mandatory=$true,Position=0 )]
         [Alias("Include")][String[]]$Filter ,
         [parameter(Position=1)]
-        [String]$Path = $pwd,
+        [String]$Path ,
         [parameter(ParameterSetName="WhereEQ",      Mandatory=$true,Position=0)]
         [parameter(ParameterSetName="WhereNE",      Mandatory=$true,Position=0)]
         [parameter(ParameterSetName="WhereGT",      Mandatory=$true,Position=0)]
@@ -339,7 +357,7 @@ Function Get-IndexedItem {
     $adapter = New-Object -TypeName system.data.oledb.oleDBDataadapter -argumentlist $sql, "Provider=Search.CollatorDSO;Extended Properties=’Application=Windows’;"
     $ds      = New-Object -TypeName system.data.dataset
     if ($adapter.Fill($ds)) {
-            if ($OutputVariable) {Set-Variable -Scope 2 -Name $OutputVariable -Value $ds.Tables[0] }
+            if ($OutputVariable) {Set-Variable -Scope 2 -Name $OutputVariable -Value $ds.Tables[0] }  #Set the variable two scopes up. A script needs 1, in a module it needs 2.
             else {
                 foreach ($row in $ds.Tables[0])  {
                     #If the dataRow refers to a file output a file obj with extra properties, otherwise output a PSobject
