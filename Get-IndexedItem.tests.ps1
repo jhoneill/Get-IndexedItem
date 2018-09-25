@@ -53,12 +53,10 @@ Describe "Get-IndexedItem" {
         $J = Get-IndexedItem -Filter "kind = '$kind'" -path $path -Bare -NoFiles -Recurse
         $J.count                                                        | Should     beGreaterThan $i.Count
     }
-    it "Got Results for ""<Filter>"" for current folder with -NoFiles option           " -TestCases $testCases3 {
+    it "Got Results for ""<Filter>"" for whole index with -NoFiles option "              -TestCases $testCases3 {
         Param ($filter, $path , $Kind,  $shortProperty, $longProperty)
         $i = $null
-        Push-Location $path
-        $i = Get-IndexedItem -Filter $filter -path $null -NoFiles -Recurse
-        Pop-Location
+        $i = Get-IndexedItem -Filter $filter -NoFiles -Recurse
         $i                                                              | Should not beNullOrEmpty
         $i[0].GetType().name                                            | Should not be FileInfo   #With -NoFiles should not become file info
         $i[0].GetType().name                                            | Should not be DataRow    #Without bare  should be a ps custom object
@@ -66,12 +64,10 @@ Describe "Get-IndexedItem" {
         $i[0].$shortProperty                                            | Should not beNullOrEmpty #Without bare system.whatever.Thing becomes things
         $i[0].$longProperty                                             | Should     beNullOrEmpty
     }
-    it "Got Results for ""<Filter>"" for current folder with -NoFiles and -Bare Options" -TestCases $testCases3 {
+    it "Got Results for ""<Filter>"" for Whole index with -NoFiles and -Bare Options"    -TestCases $testCases3 {
         Param  ($filter, $path , $Kind,  $shortProperty, $longProperty)
         $i = $null
-        Push-Location $path
-        $i = Get-IndexedItem -Filter $filter -path $null -NoFiles -bare -Recurse
-        Pop-Location
+        $i = Get-IndexedItem -Filter $filter -NoFiles -bare -Recurse
         $i                                                              | Should not beNullOrEmpty
         $i[0].GetType().name                                            | Should not be FileInfo
         $i[0].GetType().name                                            | Should     be DataRow
@@ -79,7 +75,7 @@ Describe "Get-IndexedItem" {
         $i[0].$shortProperty                                            | Should     beNullOrEmpty  #Without bare system.whatever.Thing remains as is
         $i[0].$longProperty                                             | Should not beNullOrEmpty
     }
-    it "Got Results for ""<Filter>"" with -NoFiles and -Bare Options                   " -TestCases $testCases3 {
+    it "Got Results for ""<Filter>"" searching <Path> with -NoFiles and -Bare Options"   -TestCases $testCases3 {
         Param  ($filter, $path , $Kind,  $shortProperty, $longProperty)
         $i = $null
         $i = Get-IndexedItem -Filter $filter -path $path -NoFiles -bare -Recurse
