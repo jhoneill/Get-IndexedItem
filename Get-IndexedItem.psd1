@@ -12,11 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-<<<<<<< HEAD
 ModuleVersion = '3.0.1'
-=======
-ModuleVersion = '3.0'
->>>>>>> 6d63b27b80c4cc8095934968af6f20ab8cf43e4a
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -31,11 +27,7 @@ Author = 'James O''Neill'
 CompanyName = 'Mobula Consulting'
 
 # Copyright statement for this module
-<<<<<<< HEAD
 Copyright = 'Â© James O''Neill 2011-2018. All rights reserved.'
-=======
-Copyright = '© James O''Neill 2011-2018. All rights reserved.'
->>>>>>> 6d63b27b80c4cc8095934968af6f20ab8cf43e4a
 
 # Description of the functionality provided by this module
 Description = 'Queries the Windows Index using properties or Freetext searches'
@@ -74,13 +66,9 @@ CLRVersion = '2.0'
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-<<<<<<< HEAD
  NestedModules = @("Get-indexedItem.ps1",
                   "ArgumentCompleter.ps1"
 )
-=======
-# NestedModules = @()
->>>>>>> 6d63b27b80c4cc8095934968af6f20ab8cf43e4a
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = 'Get-IndexedItem'
