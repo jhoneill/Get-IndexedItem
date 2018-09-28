@@ -11,7 +11,7 @@ $PropertyAliases   = @{Width         = "System.Image.HorizontalSize";       Heig
 $FieldTypes = "System", "Photo", "Image", "Music", "Media", "RecordedTv", "Search", "Audio"
 #For each of the field types listed above, define a prefix & a list of fields, formatted as "Bare_fieldName1|Bare_fieldName2|Bare_fieldName3"
 #Anything which appears in FieldTypes must have a prefix and fields definition.
-#Any definitions which don't appear in FieldTypes will be ignored
+#Any definitions which don't appear in FieldTypes will be ignored.
 #See http://msdn.microsoft.com/en-us/library/dd561977(v=VS.85).aspx for property info.
 
 #https://docs.microsoft.com/en-gb/windows/desktop/properties/document-bumper
@@ -28,28 +28,27 @@ $SelectFields     = $FieldTypes  | ForEach-Object { (Get-Variable -Name "$($_)Fi
 $IndexFields      = $PropertyAliases.keys  + $SelectFields | Sort-Object
 $IndexFields      | ForEach-Object -Begin {$CodeFrag =  "public struct IndexedItem`r`n{"} `
                               -Process {$CodeFrag += "    public string $_;`r`n" } -end { Add-Type -TypeDefinition ($CodeFrag + "`r`n}") }
-#endRegion
+#endregion
 Function Get-IndexedItem {
     <#
       .SYNOPSIS
         Gets files that have been indexed by Windows Desktop Search.
       .Description
         Searches the Windows-Index on the local computer, or on a remote file serving computer,
-        looking for matching file meta-data properties or performing free text searches on file contents.
+        looking for matching meta-data properties or performing free text searches against file content.
       .PARAMETER Filter
         Alias INCLUDE.
         A single string containing a WHERE condition, or containing multiple conditions linked with 'AND'
-        or multiple strings, each holding a single Condition, which will be joined together.
+        or multiple strings, each holding a single condition, which will be joined together.
         The function tries to add file-name prefixes and single quotes around string values if they are omitted.
-        If no =, >,< , Like or Contains is specified, the terms will be used in a FreeText CONTAINS search
+        If no =, >,< , Like or Contains is specified, the terms will be used in a CONTAINS free text search.
         Syntax Information for CONTAINS and FREETEXT can be found at
         http://msdn.microsoft.com/en-us/library/dd626247(v=office.11).aspx .
       .PARAMETER Where
-
-        Specifies a field-name for a WHERE condition,; used in conjunction with -Eq etc.
+        Specifies a field-name for a WHERE condition; used in conjunction with -Eq etc.
         An argument completer allows intellisense to suggest field names.
       .PARAMETER EQ
-        Combined with -Where to specify "field is equal to ..." .
+        Combined with -Where to specify "field is equal to ...".
         An argument completer allows intellisense to suggest possible values for this field.
       .PARAMETER NE
         Used with -Where to specify "field is not equal to ...".
@@ -63,13 +62,13 @@ Function Get-IndexedItem {
         Used with -Where to specify a free text search.
       .PARAMETER OrderBy
         Alias SORT.
-        Either a single string containing one or more Order BY conditions,
+        Either a single string containing one or more ORDER BY conditions,
         or multiple strings, each with a single condition which will be joined together.
       .PARAMETER Property
-        By defauult all possible properties of indexed items are returned.
+        By default all possible properties of indexed items are returned.
         If -Property is specified only the named properties will be returned.
       .PARAMETER Bare
-        If -Bare is not specified the command will convert the field-names to easier to read names.
+        If -Bare is not specified, the command will convert the field-names to easier to read names.
         Specifying -Bare prevents this conversion and improves performance.
       .PARAMETER Path
         A single string containing a path which should be searched.
@@ -80,10 +79,10 @@ Function Get-IndexedItem {
         A single integer representing the number of items to be returned.
       .PARAMETER Value
         Alias GROUP
-        A single string containing a field-name. If specified the search will return the values
-        in this field, instead of objects for the items found by the query terms.
+        A single string containing a field-name. If specified the search will return
+        the unique values in this field, instead of objects for matching items.
       .PARAMETER Recurse
-        If -Path is specified only a single folder is searched Unless -Recurse is specified.
+        If -Path is specified only a single folder is searched unless -Recurse is specified.
         If -Path is not specified the whole index is searched, and -Recurse is ignored.
       .PARAMETER List
         Instead of querying the index, produces a list of known field names, with short names and aliases
@@ -111,7 +110,7 @@ Function Get-IndexedItem {
         Get-IndexedItem -filter stingray -path OneIndex16:// -recurse
 
         Finds OneNote items containing "Stingray".
-        (note, nothing will be found without -recurse and the number after Index is office version specific.)
+        (note, nothing will be found without -recurse and the number after OneIndex is Office-version specific.)
       .EXAMPLE
         Get-IndexedItem -filter stingray -path ([system.environment]::GetFolderPath( [system.environment+specialFolder]::MyPictures )) -recurse
 
@@ -121,7 +120,7 @@ Function Get-IndexedItem {
         Get-IndexedItem -Filter "system.kind = 'recordedTV' " -order "System.RecordedTV.RecordingTime" -path "\\atom-engine\users" -recurse | format-list path,title,episodeName,programDescription
 
         Finds recorded TV files on a remote server named 'Atom-Engine' which are accessible via a share named 'users'.
-        Field name prefixes are specified explicitly instead of letting the function add them.
+        In this example, field-name prefixes are specified explicitly, instead of letting the function add them.
         Results are displayed as a list using a subset of the available fields specific to recorded TV.
       .EXAMPLE
         Get-IndexedItem -Value "kind" -path \\atom-engine\users  -recurse
@@ -140,26 +139,27 @@ Function Get-IndexedItem {
       .EXAMPLE
         Get-IndexedItem -Filter "System.Kind = 'Music' AND AlbumArtist like '%' " -NoFiles | Group-Object -NoElement -Property "AlbumArtist" | sort -Descending -property count
 
-        Gets all music files with an Album Artist set, using a single where condition combining two terms
-        and a mixture of implicit and explicit field prefixes.
-        The result is grouped by Artist and sorted to give popular artist first
+        Gets all music files with an Album Artist set, using a single filter string holding a 
+        where condition combining two terms which mix implicit and explicit field prefixes.
+        The result is grouped by Artist and sorted to give popular artist first.
       .EXAMPLE
         Get-IndexedItem -Filter "Kind=music","DateModified>'2012-05-31'" -NoFiles | Select-Object -ExpandProperty name
 
-        Gets Music files which have been modified since a given date, and shows just their names.
-        Note the date format; and note that the date is actually a date time, so DataModified= will only match files saved at midnight.
+        Gets Music files which have been modified since a given date and shows just their names.
+        Note the date format is year-month-day; the date is actually a date time, so DataModified= 
+        will only match files saved at midnight.
       .EXAMPLE
         Get-IndexedItem "itemtype='.mp3'","AlbumArtist like '%'","RatingText <> '1 star'" -NoFiles -orderby encodingBitrate,size -path $null | ft -a AlbumArtist,
             Title, @{n="size"; e={($_.size/1MB).tostring("n2")+"MB" }},@{n="duration";e={$_.duration.totalseconds.tostring("n0")+"sec"}},
             @{n="Byes/Sec";e={($_.size/128/$_.duration.totalSeconds).tostring("n0")+"Kb/s"}},@{n="Encoding";e={($_.EncodingBitrate/1000).tostring("n0")+"Kb/s"}},
             @{n="Sample Rate";e={($_.sampleRate/1000).tostring("n1")+"KHz"}}
 
-            Shows MP3 files with Artist and Track name, showing Size, duration, actual and encoding bits per second and sample rate
+            Shows MP3 files with Artist and Track name, showing Size, duration, actual and encoding bits per second and sample rate.
       .EXAMPLE
         Get-IndexedItem -path c:\ -recurse  -Filter cameramaker=Pentax* -Property focallength | group focallength -no | sort -property @{e={[double]$_.name}}
 
         Gets all the items which have a the Camera Maker set to "Pentax", anywhere on the C: drive
-        but ONLY get thier focallength property, and return a sorted count of how many of each focal length there are.
+        but ONLY get their FocalLength property, and returns a sorted count of how many of each focal length there are.
     #>
 
     [CmdletBinding(DefaultParameterSetName='Filter')]
