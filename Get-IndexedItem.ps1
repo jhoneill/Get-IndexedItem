@@ -14,7 +14,9 @@ $FieldTypes = "System", "Photo", "Image", "Music", "Media", "RecordedTv", "Searc
 #Any definitions which don't appear in FieldTypes will be ignored.
 #See http://msdn.microsoft.com/en-us/library/dd561977(v=VS.85).aspx for property info.
 
-#https://docs.microsoft.com/en-gb/windows/desktop/properties/document-bumper
+#One can add more fields but too many seems to cause some searches to crash. e.g.
+#$DocumentPrefix   = "System.Document."   ;   $DocumentFields = "DatePrinted|DateSaved|LastAuthor|PageCount|ParagraphCount|SlideCount|WordCount" https://docs.microsoft.com/en-gb/windows/desktop/properties/document-bumper
+
 $SystemPrefix     = "System."            ;     $SystemFields = "ItemName|ItemUrl|FileExtension|FileName|FileAttributes|FileOwner|ItemType|ItemTypeText|KindText|Kind|MIMEType|Size|DateModified|DateAccessed|DateImported|DateAcquired|DateCreated|Author|Company|Copyright|Subject|Title|Keywords|Comment|SoftwareUsed|Rating|RatingText|ApplicationName|ItemPathDisplay"
 $PhotoPrefix      = "System.Photo."      ;      $PhotoFields = "fNumber|ExposureTime|FocalLength|IsoSpeed|PeopleNames|DateTaken|Cameramodel|Cameramanufacturer|orientation"#https://docs.microsoft.com/en-gb/windows/desktop/properties/photo-bumper
 $ImagePrefix      = "System.Image."      ;      $ImageFields = "Dimensions|HorizontalSize|VerticalSize" #https://docs.microsoft.com/en-gb/windows/desktop/properties/image-bumper
@@ -139,14 +141,14 @@ Function Get-IndexedItem {
       .EXAMPLE
         Get-IndexedItem -Filter "System.Kind = 'Music' AND AlbumArtist like '%' " -NoFiles | Group-Object -NoElement -Property "AlbumArtist" | sort -Descending -property count
 
-        Gets all music files with an Album Artist set, using a single filter string holding a 
+        Gets all music files with an Album Artist set, using a single filter string holding a
         where condition combining two terms which mix implicit and explicit field prefixes.
         The result is grouped by Artist and sorted to give popular artist first.
       .EXAMPLE
         Get-IndexedItem -Filter "Kind=music","DateModified>'2012-05-31'" -NoFiles | Select-Object -ExpandProperty name
 
         Gets Music files which have been modified since a given date and shows just their names.
-        Note the date format is year-month-day; the date is actually a date time, so DataModified= 
+        Note the date format is year-month-day; the date is actually a date time, so DataModified=
         will only match files saved at midnight.
       .EXAMPLE
         Get-IndexedItem "itemtype='.mp3'","AlbumArtist like '%'","RatingText <> '1 star'" -NoFiles -orderby encodingBitrate,size -path $null | ft -a AlbumArtist,
